@@ -1,0 +1,21 @@
+{
+  "name": "EvoDesk",
+  "version": "1.0.0",
+  "description": "blockchain",
+  "scripts": {
+    "start": "npm i && nodemon server.js"
+  },
+  "keywords": [],
+  "author": "Startap studio HQ",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "connect-mongo": "^2.0.0",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.14.0",
+    "express-session": "^1.15.6",
+    "mongoose": "^4.13.2",
+    "nodemon": "^1.11.0",
+    "nunjucks": "^3.0.1"
+  }
+}

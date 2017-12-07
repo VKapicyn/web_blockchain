@@ -12,11 +12,11 @@ let login = require('./config').dbLogin,
     adress = require('./config').dbAdress,
     dbName = require('./config').dbName,
     dbPort = require('./config').dbPort,
-    //url = 'mongodb://'+login+':'+pass+'@'+adress+':'+dbPort + '/' + dbName;
-    url = 'mongodb://localhost:27017/ExampleDB';
+    url = 'mongodb://'+adress+':'+dbPort + '/' + dbName;
+    // url = 'mongodb://localhost:27017/ExampleDB';
 
 mongoose.Promise = global.Promise;
-//mongoose.connect(url, {useMongoClient: true});
+mongoose.connect(url, {useMongoClient: true});
 module.exports.mongoose = mongoose;
 
 

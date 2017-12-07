@@ -1,13 +1,24 @@
 //подключаем модели
-const eth = require('./models/eth');
+const eth = require('./models/eth'),
+    userModel = require('./models/userModel').userModel;
 
 //code = результат операции или ошибки!
-exports.createUser = (req, res) => {
-    let userId = req.body.userId;
+exports.createUser = async (req, res) => {
+    const userId = req.body.userId;
+    let code;
 
     //проверка в бд на случай если user уже существует
-    if(true) {
+    const foundUser = await userModel.getUser(userId);
+    if(!foundUser) {
         //создание кошелька
+        let walletData = await eth.createWallet();
+        walletData.userId = userId;
+    
+        const newWallet = await userModel.addWallet(walletData);
+        
+        code = 1;
+    } else {
+        code = 0;
     }
 
     res.json({code: code});

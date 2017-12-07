@@ -16,11 +16,11 @@ let login = require('./config').dbLogin,
     url = 'mongodb://localhost:27017/ExampleDB';
 
 mongoose.Promise = global.Promise;
-mongoose.connect(url, {useMongoClient: true});
+//mongoose.connect(url, {useMongoClient: true});
 module.exports.mongoose = mongoose;
-module.exports.locales = locales;
 
-app.use(    
+
+/*app.use(    
 session(
     ({
         secret: require('./config.js').session,
@@ -30,7 +30,7 @@ session(
             url: url
         })
     })
-));
+));*/
 
 app.use(
     express.static(__dirname + '/src'),

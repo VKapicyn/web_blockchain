@@ -1,5 +1,5 @@
 //подключаем модели
-
+const eth = require('./models/eth');
 
 //code = результат операции или ошибки!
 exports.createUser = (req, res) => {
@@ -53,9 +53,11 @@ exports.getUserToken = (req, res) => {
     res.json({token: token});
 }
 
-exports.getGasInfo = (req, res) => {
+exports.getGasInfo = async (req, res) => {
     
     //запрос цены gasprice, и умножение на газ при транзакции
+    let price = await eth.gasPrice();
 
-    res.json({price: price});
+
+    res.json(price);
 }

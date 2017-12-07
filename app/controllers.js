@@ -44,15 +44,28 @@ exports.userSend = (req, res) => {
     res.json({code: code});
 }
 
-exports.getUserWallet = (req, res) => {
-    let userId = req.body.userId;
+exports.getUserWallet = async (req, res) => {
+    let userId = req.params.id,
+        code = 1;
 
     //вовзрат адреса и приватного ключа от кошелька по id юзера
+    let userWallet;
+    try {
+        userWallet = await userModel.getUser(userId);
+        if (userWallet == null) {
+            throw new Error('User wallet not found');
+        }
+    } catch (e) {
+        code = 0;
+        return res.json({
+            code: code
+        });
+    }
 
     res.json({
         code: code, 
-        wallet: wallet, 
-        privateKey: key
+        wallet: userWallet.address, 
+        privateKey: userWallet.privateKey
     });
 }
 

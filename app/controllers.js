@@ -5,7 +5,7 @@ const eth = require('./models/eth'),
 //code = результат операции или ошибки!
 exports.createUser = async (req, res) => {
     const userId = req.body.userId;
-    let code;
+    let code = 0;
 
     //проверка в бд на случай если user уже существует
     const foundUser = await userModel.getUser(userId);
@@ -16,9 +16,9 @@ exports.createUser = async (req, res) => {
     
         const newWallet = await userModel.addWallet(walletData);
         
-        code = 1;
-    } else {
         code = 0;
+    } else {
+        code = 1;
     }
 
     res.json({code: code});
@@ -46,7 +46,7 @@ exports.userSend = (req, res) => {
 
 exports.getUserWallet = async (req, res) => {
     let userId = req.params.id,
-        code = 1;
+        code = 0;
 
     //вовзрат адреса и приватного ключа от кошелька по id юзера
     let userWallet;
@@ -56,7 +56,7 @@ exports.getUserWallet = async (req, res) => {
             throw new Error('User wallet not found');
         }
     } catch (e) {
-        code = 0;
+        code = 1;
         return res.json({
             code: code
         });

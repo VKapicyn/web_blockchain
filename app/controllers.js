@@ -57,7 +57,7 @@ exports.getGasInfo = async (req, res) => {
     
     //запрос цены gasprice, и умножение на газ при транзакции
     let price = await eth.gasPrice();
-
+    //let trns = await eth.testMethods();
 
     res.json(price);
 }

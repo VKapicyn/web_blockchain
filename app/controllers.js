@@ -26,9 +26,11 @@ exports.createUser = async (req, res) => {
 
 exports.adminSend = (req, res) => {
     let userId = req.body.userId,
-        tokens = req.body.tokens;
+        tokens = req.body.tokens,
+        code = 0;
 
     //отправка с кошелька админа токенов
+    eth.sendEth();
 
     res.json({code: code});
 }
@@ -36,10 +38,12 @@ exports.adminSend = (req, res) => {
 exports.userSend = (req, res) => {
     let idFrom = req.body.idFrom,
         idTo = req.body.idTp,
-        tokens = req.body.tokens;
+        tokens = req.body.tokens,
+        code = 0;
 
     //1. Отправка eth с кошелька админа на кошелек idFrom
     //2. Отправка токенов с idFrom на idTo токенов
+    eth.sendTokens();
 
     res.json({code: code});
 }

@@ -5,62 +5,92 @@ const eth = require('./models/eth'),
 //code = результат операции или ошибки!
 exports.createUser = async (req, res) => {
     const userId = req.body.userId;
-    let code = 0;
+    let code = 0,
+        errorMessage;
 
-    //проверка в бд на случай если user уже существует
-    const foundUser = await userModel.getUser(userId);
-    if(!foundUser) {
+    try {
+        //проверка в бд на случай если user уже существует
+        const foundUser = await userModel.getUser(userId);
+        if (foundUser) {
+            throw new Error('User wallet already exist!');
+        }
+
         //создание кошелька
         let walletData = await eth.createWallet();
         walletData.userId = userId;
     
         const newWallet = await userModel.addWallet(walletData);
-        
-        code = 0;
-    } else {
+    } catch (e) {
+        errorMessage = e.name + ":" + e.message + "\n" + e.stack;
         code = 1;
     }
 
-    res.json({code: code});
+    res.json({
+        code: code,
+        error: errorMessage
+    });
 }
 
 exports.adminSend = async (req, res) => {
-    let userId = req.body.userId,
-        tokens = req.body.tokens,
-        code = 0,
+    const userId = req.body.userId,
+        tokens = req.body.tokens;
+
+    let code = 0,
+        errorMessage,
         tx;
 
-    const foundUser = await userModel.getUser(userId);
+    const foundUser = await userModel.getUser(userId),
+        gasPrice = await eth.getGasPrice();
+    
     //отправка с кошелька админа токенов
     try {
         tx = await eth.sendToken(foundUser.address, tokens);
     } catch(e) {
-        code = 1;
+        errorMessage = e.name + ":" + e.message + "\n" + e.stack;
+        code = 2;
     }
 
-    res.json({code: code});
+    res.json({
+        code: code,
+        error: errorMessage
+    });
 }
 
 exports.userSend = async (req, res) => {
-    let idFrom = req.body.idFrom,
+    const idFrom = req.body.idFrom,
         idTo = req.body.idTo,
-        tokens = req.body.tokens,
-        code = 0;
+        tokens = req.body.tokens;
+        
+    let code = 0,
+        errorMessage;
+
 
     const userFrom = await userModel.getUser(idFrom),
-        userTo = await userModel.getUser(idTo);
+        userTo = await userModel.getUser(idTo),
 
-    //1. Отправка eth с кошелька админа на кошелек idFrom
-    await eth.sendEth(userFrom.address);
-    //2. Отправка токенов с idFrom на idTo токенов
-    await eth.sendTokenFrom(userFrom, userTo.address, tokens);
-
-    res.json({code: code});
+        gasPrice = await eth.getGasPrice();
+    
+    try {
+        //1. Отправка eth с кошелька админа на кошелек idFrom
+        await eth.sendEth(userFrom.address, gasPrice);
+        //2. Отправка токенов с idFrom на idTo токенов
+        await eth.sendTokenFrom(userFrom, userTo.address, tokens, gasPrice);
+    } catch (e) {
+        errorMessage = e.name + ":" + e.message + "\n" + e.stack;
+        code = 2;
+    }
+    
+    res.json({
+        code: code,
+        error: errorMessage
+    });
 }
 
 exports.getUserWallet = async (req, res) => {
-    let userId = req.params.id,
-        code = 0;
+    const userId = req.params.id;
+        
+    let code = 0,
+        errorMessage;
 
     //вовзрат адреса и приватного ключа от кошелька по id юзера
     let userWallet;
@@ -70,34 +100,49 @@ exports.getUserWallet = async (req, res) => {
             throw new Error('User wallet not found');
         }
     } catch (e) {
-        code = 1;
+        errorMessage = e.name + ":" + e.message + "\n" + e.stack;
+        code = 3;
         return res.json({
-            code: code
+            code: code,
+            error: errorMessage
         });
     }
 
     res.json({
-        code: code, 
-        wallet: userWallet.address, 
-        privateKey: userWallet.privateKey
+        code: code,
+        wallet: {
+            address: userWallet.address, 
+            privateKey: userWallet.privateKey
+        }
     });
 }
 
 exports.getUserToken = async (req, res) => {
-    let userId = req.params.userId;
+    const userId = req.params.userId,
+        foundUser = userModel.getUser(userId);
+        
+    let code = 0,
+        tokenBalance = 0,
+        errorMessage;
 
-    const foundUser = userModel.getUser(userId);
+    try {
+        //возврат числа токенов user'a
+        tokenBalance = await eth.getToken(foundUser.address);
+    } catch (e) {
+        errorMessage = e.name + ":" + e.message + "\n" + e.stack;
+        code = 3;
+    }
 
-    //возврат числа токенов user'a
-    const tokenBalance = await eth.getToken(foundUser.address);
-
-    res.json({token: tokenBalance});
+    res.json({
+        token: tokenBalance,
+        code: code,
+        error: errorMessage
+    });
 }
 
 exports.getGasInfo = async (req, res) => {
-    
     //запрос цены gasprice, и умножение на газ при транзакции
     let price = await eth.getGasPrice();
 
-    res.json(price);
+    res.json({price: price});
 }

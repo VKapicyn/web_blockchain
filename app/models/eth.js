@@ -29,9 +29,7 @@ exports.getToken = async (walletAddr) => {
     return balance;
 }
 
-exports.sendToken = async (addressTo, value) => {
-    let gasPrice = await web3.eth.getGasPrice();
-
+exports.sendToken = async (addressTo, value, gasPrice) => {
     let transfer = await MyContract.methods.transfer(addressTo, value).send({
         from: web3.eth.accounts.wallet[0].address,
         gasLimit: 124842, 
@@ -41,29 +39,24 @@ exports.sendToken = async (addressTo, value) => {
     return transfer; 
 }
 
-exports.sendTokenFrom = async (walletFrom, addressTo, value) => {
-    let gasPrice = await web3.eth.getGasPrice();
-
-    await web3.eth.accounts.wallet.add({
-        address: walletFrom.address,
-        privateKey: walletFrom.privateKey
+exports.sendTokenFrom = async (accountFrom, addressTo, value, gasPrice) => {
+    const walletFrom = await web3.eth.accounts.wallet.add({
+        address: accountFrom.address,
+        privateKey: accountFrom.privateKey
     });
 
     let transfer = await MyContract.methods.transfer(addressTo, value).send({
-        from: web3.eth.accounts.wallet[1].address,
+        from: walletFrom.address,
         gasLimit: 124842, 
         gasPrice: gasPrice
     });
-    console.log(transfer);
     
     await web3.eth.accounts.wallet.remove(walletFrom.address);
 
     return transfer;
 }
 
-exports.sendEth = async (addressTo) => {
-    let gasPrice = await web3.eth.getGasPrice();
-
+exports.sendEth = async (addressTo, gasPrice) => {
     let tx = await web3.eth.sendTransaction({
         from: web3.eth.accounts.wallet[0].address, 
         to: addressTo, 
@@ -72,6 +65,5 @@ exports.sendEth = async (addressTo) => {
         gasPrice: gasPrice
     });
 
-    console.log(tx);
     return tx;
 }

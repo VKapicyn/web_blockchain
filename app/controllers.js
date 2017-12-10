@@ -24,26 +24,36 @@ exports.createUser = async (req, res) => {
     res.json({code: code});
 }
 
-exports.adminSend = (req, res) => {
+exports.adminSend = async (req, res) => {
     let userId = req.body.userId,
         tokens = req.body.tokens,
-        code = 0;
+        code = 0,
+        tx;
 
+    const foundUser = await userModel.getUser(userId);
     //отправка с кошелька админа токенов
-    eth.sendEth();
+    try {
+        tx = await eth.sendToken(foundUser.address, tokens);
+    } catch(e) {
+        code = 1;
+    }
 
     res.json({code: code});
 }
 
-exports.userSend = (req, res) => {
+exports.userSend = async (req, res) => {
     let idFrom = req.body.idFrom,
-        idTo = req.body.idTp,
+        idTo = req.body.idTo,
         tokens = req.body.tokens,
         code = 0;
 
+    const userFrom = await userModel.getUser(idFrom),
+        userTo = await userModel.getUser(idTo);
+
     //1. Отправка eth с кошелька админа на кошелек idFrom
+    await eth.sendEth(userFrom.address);
     //2. Отправка токенов с idFrom на idTo токенов
-    eth.sendTokens();
+    await eth.sendTokenFrom(userFrom, userTo.address, tokens);
 
     res.json({code: code});
 }
@@ -73,19 +83,21 @@ exports.getUserWallet = async (req, res) => {
     });
 }
 
-exports.getUserToken = (req, res) => {
-    let userId = req.body.userId;
+exports.getUserToken = async (req, res) => {
+    let userId = req.params.userId;
+
+    const foundUser = userModel.getUser(userId);
 
     //возврат числа токенов user'a
+    const tokenBalance = await eth.getToken(foundUser.address);
 
-    res.json({token: token});
+    res.json({token: tokenBalance});
 }
 
 exports.getGasInfo = async (req, res) => {
     
     //запрос цены gasprice, и умножение на газ при транзакции
-    let price = await eth.gasPrice();
-
+    let price = await eth.getGasPrice();
 
     res.json(price);
 }

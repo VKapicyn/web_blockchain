@@ -20,7 +20,7 @@ mongoose.connect(url, {useMongoClient: true});
 module.exports.mongoose = mongoose;
 
 
-/*app.use(    
+app.use(    
 session(
     ({
         secret: require('./config.js').session,
@@ -30,7 +30,7 @@ session(
             url: url
         })
     })
-));*/
+));
 
 app.use(
     express.static(__dirname + '/src'),

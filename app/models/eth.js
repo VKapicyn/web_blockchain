@@ -61,7 +61,7 @@ exports.sendEth = async (addressTo, gasPrice) => {
         from: web3.eth.accounts.wallet[0].address, 
         to: addressTo, 
         value: 124842*gasPrice, 
-        gasLimit: 210000, 
+        gasLimit: 21000, 
         gasPrice: gasPrice
     });
 

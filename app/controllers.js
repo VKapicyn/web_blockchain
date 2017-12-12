@@ -1,6 +1,7 @@
 //подключаем модели
 const eth = require('./models/eth'),
-    userModel = require('./models/userModel').userModel;
+    userModel = require('./models/userModel').userModel,
+    adminModel = require('./models/adminModel').adminModel;
 
 //code = результат операции или ошибки!
 exports.createUser = async (req, res) => {
@@ -145,4 +146,40 @@ exports.getGasInfo = async (req, res) => {
     let price = await eth.getGasPrice();
 
     res.json({price: price});
+}
+
+// =============================================================================
+// Admin page
+// =============================================================================
+
+exports.getLoginPage = (req, res) => {
+    if (req.session.admin) {
+        return res.redirect('/admin/settings');
+    }
+
+    res.render('login.html');
+}
+
+exports.login = async (req, res) => {
+    if (req.session.admin) {
+        return res.redirect('/admin/settings');
+    }
+
+    const admin = await adminModel.checkAdmin(req.body.username, req.body.password);
+    if (admin === null) {
+        return res.redirect('back');
+    }
+
+    req.session.admin = {id: admin._id, username: admin.username}
+
+    res.redirect('/admin/settings');
+}
+
+exports.logout = (req, res) => {
+    delete req.session.admin;
+    res.redirect('/admin/login');
+}
+
+exports.getSettingsPage = (req, res) => {
+    res.render('settings.html');
 }

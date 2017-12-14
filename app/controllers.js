@@ -1,7 +1,9 @@
 //подключаем модели
 const eth = require('./models/eth'),
     userModel = require('./models/userModel').userModel,
-    adminModel = require('./models/adminModel').adminModel;
+    adminModel = require('./models/adminModel').adminModel,
+    fs = require('fs'),
+    options = require('../options.json');
 
 //code = результат операции или ошибки!
 exports.createUser = async (req, res) => {
@@ -70,6 +72,7 @@ exports.userSend = async (req, res) => {
         userTo = await userModel.getUser(idTo),
 
         gasPrice = await eth.getGasPrice();
+        
     
     try {
         //1. Отправка eth с кошелька админа на кошелек idFrom
@@ -119,9 +122,9 @@ exports.getUserWallet = async (req, res) => {
 }
 
 exports.getUserToken = async (req, res) => {
-    const userId = req.params.userId,
-        foundUser = userModel.getUser(userId);
-        
+    const userId = req.params.id,
+        foundUser = await userModel.getUser(userId);
+
     let code = 0,
         tokenBalance = 0,
         errorMessage;
@@ -181,5 +184,9 @@ exports.logout = (req, res) => {
 }
 
 exports.getSettingsPage = (req, res) => {
-    res.render('settings.html');
+    res.render('settings.html', {options: options});
+}
+
+exports.updateSettings = async (req, res) => {
+    options.test = req.body.test;
 }

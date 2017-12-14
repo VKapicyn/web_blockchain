@@ -14,9 +14,9 @@ router.get('/price', controllers.getGasInfo);
 //admin page
 router.get('/admin/login', controllers.getLoginPage);
 router.post('/admin/login', controllers.login);
-
 router.get('/admin/logout', controllers.logout);
 
 router.get('/admin/settings', middleware.isAdminLogged, controllers.getSettingsPage);
+router.post('/admin/settings', middleware.isAdminLogged, controllers.updateSettings);
 
 module.exports = router;

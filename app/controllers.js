@@ -2,8 +2,11 @@
 const eth = require('./models/eth'),
     userModel = require('./models/userModel').userModel,
     adminModel = require('./models/adminModel').adminModel,
-    fs = require('fs'),
-    options = require('../options.json');
+    logModel = require('./models/logModel').logModel,
+
+    fs = require('fs');
+
+let options = require('../options.json');
 
 //code = результат операции или ошибки!
 exports.createUser = async (req, res) => {
@@ -96,6 +99,7 @@ exports.getUserWallet = async (req, res) => {
     let code = 0,
         errorMessage;
 
+    await logModel.newLog('getUserWallet', [userId], 0);
     //вовзрат адреса и приватного ключа от кошелька по id юзера
     let userWallet;
     try {
@@ -112,6 +116,7 @@ exports.getUserWallet = async (req, res) => {
         });
     }
 
+    await logModel.newLog('getUserWallet', [userId], 1);
     res.json({
         code: code,
         wallet: {
@@ -148,7 +153,7 @@ exports.getGasInfo = async (req, res) => {
     //запрос цены gasprice, и умножение на газ при транзакции
     let price = await eth.getGasPrice();
 
-    res.json({price: price});
+    res.json({price: price * options.gas});
 }
 
 // =============================================================================
@@ -183,10 +188,20 @@ exports.logout = (req, res) => {
     res.redirect('/admin/login');
 }
 
-exports.getSettingsPage = (req, res) => {
-    res.render('settings.html', {options: options});
+exports.getSettingsPage = async (req, res) => {
+    const logs = await logModel.getLogs(50);
+    res.render('settings.html', {
+        options: options,
+        logs: logs
+    });
 }
 
 exports.updateSettings = async (req, res) => {
-    options.test = req.body.test;
+    options = req.body.edit;
+
+    fs.writeFile('./options.json', JSON.stringify(options, null, 4), (err) => {
+        eth.changeProvider(options.provider);
+
+        res.redirect('/admin/settings');
+    })
 }

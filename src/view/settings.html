@@ -1,18 +1,63 @@
 {% extends "templates/pageTempl.html" %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-6">
+        <div class="well col-md-5">
+            <h1 class="text-center">Настройки</h1>
             <form action="/admin/settings" method="POST">
-                <input type="text" name="test" value="{{ options.test }}">
+                <div class="form-group">
+                    <label for="provider">Адрес ноды:</label>
+                    <input id="provider" class="form-control" type="text" name="edit[provider]" value="{{ options.provider }}">
+                </div>
 
-                <button>Submit</button>
+                <div class="form-group">
+                    <label for="walletAddr">Адрес кошелька:</label>
+                    <input id="walletAddr" class="form-control" type="text" name="edit[adminWalletAddr]" value="{{ options.adminWalletAddr }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="privateKey">Приватный ключ:</label>
+                    <input id="privateKey" class="form-control" type="text" name="edit[adminPrivKey]" value="{{ options.adminPrivKey }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="passPhrase">Парольная фраза:</label>
+                    <input id="passPhrase" class="form-control" type="text" name="edit[passPhrase]" value="{{ options.passPhrase }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="gas">Количество газа:</label>
+                    <input id="gas" class="form-control" type="text" name="edit[gas]" value="{{ options.gas }}">
+                </div>
+
+                <button class="btn btn-primary">Сохранить</button>
             </form>
         </div>
-        <div class="col-md-6">
-
+        <div class="col-md-7">
+            <h1 class="text-center">Логи операций</h1>
+            <div class="table-responsive" style="height: 80vh; overflow-y: auto">
+                <table class="table">
+                    <tr>
+                        <th>Дата и время</th>
+                        <th>Операция и её аргументы</th>
+                        <th>Статус операции</th>
+                    </tr>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.date }}</td>
+                        <td>{{ log.function }}</td>
+                        <td>{{ log.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block commonJS %}
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 {% endblock %}

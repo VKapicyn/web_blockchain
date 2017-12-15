@@ -148,7 +148,11 @@ exports.getGasInfo = async (req, res) => {
     //запрос цены gasprice, и умножение на газ при транзакции
     let price = await eth.getGasPrice();
 
-    res.json({price: price});
+    res.json({
+        gwei: gwei, 
+        eth: eth, 
+        usd: usd,
+    });
 }
 
 // =============================================================================
@@ -189,4 +193,12 @@ exports.getSettingsPage = (req, res) => {
 
 exports.updateSettings = async (req, res) => {
     options.test = req.body.test;
+}
+
+// =============================================================================
+// Pages
+// =============================================================================
+
+exports.testPage = (req, res) => {
+    res.render('test.html');
 }

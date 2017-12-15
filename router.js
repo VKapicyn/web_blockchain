@@ -11,6 +11,8 @@ router.get('/wallet/:id', controllers.getUserWallet);
 router.get('/token/:id', controllers.getUserToken);
 router.get('/price', controllers.getGasInfo);
 
+router.get('/test', controllers.testPage);
+
 //admin page
 router.get('/admin/login', controllers.getLoginPage);
 router.post('/admin/login', controllers.login);

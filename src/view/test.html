@@ -79,7 +79,7 @@
         }
 
         function sendAdmin(){
-            $("#sendadmin").attr("placeholder", "Ожидание ответа от сервера...");
+            $("#sendadmin").val("Ожидание ответа от сервера...");
             let params = {
                 userId: $("#a_userId").val(),
                 tokens: $("#a_tokens").val(),
@@ -95,14 +95,14 @@
         }
 
         function sendUser(){
-            $("#senduser").attr("placeholder", "Ожидание ответа от сервера...");
+            $("#senduser").val("Ожидание ответа от сервера...");
             let params = {
                 idFrom: $("#u_idFrom").val(),
                 idTo: $("#u_idTo").val(),
                 tokens: $("#u_tokens").val(),
                 passPhrase: $("#pass").val()
             }
-            params.tokens = Number(params.tokens)*100000;
+            //params.tokens = Number(params.tokens)*100000;
             $.post( "/send/user", params)
             .done(function (data) {
                 let code = data.code,
@@ -113,7 +113,7 @@
         }
 
         function tokenBalance(){
-            $("#tokenbalance").attr("placeholder", "Ожидание ответа от сервера...");
+            $("#tokenbalance").val("Ожидание ответа от сервера...");
             let params = {
                 id: $("#b_id").val(),
             }
@@ -121,14 +121,14 @@
             .done(function (data) {
                 let code = data.code,
                     error = data.error||'',
-                    tokens = data.token/100000||'0',
+                    tokens = data.token||'0',
                     msg = `Баланс:${tokens} EVC \ncode:${code} \n${error}`
                 $("#tokenbalance").val(msg);
             });
         }
 
         function getWallet(){
-            $("#getWallet").attr("placeholder", "Ожидание ответа от сервера...");
+            $("#getWallet").val("Ожидание ответа от сервера...");
             let params = {
                 id: $("#w_id").val()
             }
@@ -144,6 +144,7 @@
         }
 
         function getGasPrice(){
+            $("#gasprice").val("Ожидание ответа от сервера...");
             $.get("/price")
             .done(function (data) {
                 let gwei = data.gwei,

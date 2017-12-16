@@ -1,5 +1,13 @@
 {% extends "templates/pageTempl.html" %}
 
+{% block commonStyles %}
+<style>
+    input, textarea{
+        width: 80%;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
     Что бы отправить запрос к API необходим ключ: <input type="text" placeholder="Ключ доступа"><br>
@@ -9,7 +17,7 @@
     <br>
     <button onclick="createUser()">Отправить</button>
     <br><br>
-    <textarea id="createuser" placeholder="ответ сервера"></textarea>
+    <textarea id="createuser" rows="5" placeholder="ответ сервера"></textarea>
 
     <h2>Пополнить админом</h2>
     <input id="a_userId" type="text" placeholder="User ID">
@@ -18,7 +26,7 @@
     <br>
     <button onclick="sendAdmin()">Отправить</button>
     <br><br>
-    <textarea id="sendadmin" placeholder="ответ сервера"></textarea>
+    <textarea id="sendadmin" rows="5" placeholder="ответ сервера"></textarea>
 
     <h2>Перевод от юзера к юзеру</h2>
     <input id="u_idFrom" type="text" placeholder="От кого">
@@ -29,28 +37,26 @@
     <br>
     <button onclick="sendUser()">Отправить</button>
     <br><br>
-    <textarea id="senduser" placeholder="ответ сервера"></textarea>
+    <textarea id="senduser" rows="5" placeholder="ответ сервера"></textarea>
 
     <h2>Баланс в токенах</h2>
     <input id="b_id" type="text" placeholder="User ID">
     <br>
     <button onclick="tokenBalance()">Отправить</button>
     <br><br>
-    <textarea id="tokenbalance" placeholder="ответ сервера"></textarea>
+    <textarea id="tokenbalance" rows="5" placeholder="ответ сервера"></textarea>
 
     <h2>Доступы к кошельку</h2>
     <input id="w_id" type="text" placeholder="User Id">
     <br>
     <button onclick="getWallet()">Отправить</button>
     <br><br>
-    <textarea id="getWallet" placeholder="ответ сервера"></textarea>
+    <textarea id="getWallet" rows="5" placeholder="ответ сервера"></textarea>
 
     <h2>Цена транзакции</h2>
-    <input id="u_idFrom" type="text" placeholder="От кого">
-    <br>
-    <button onclick="sendUser()">Отправить</button>
+    <button onclick="getGasPrice()">Отправить</button>
     <br><br>
-    <textarea id="senduser" placeholder="ответ сервера"></textarea>
+    <textarea id="gasprice" rows="5" placeholder="ответ сервера"></textarea>
 </div>
 
 {% endblock %}
@@ -68,7 +74,7 @@
                 let code = data.code,
                     error = data.error||'',
                     msg = `code:${code} \n${error}`
-                $("#createuser").attr("placeholder", msg);
+                $("#createuser").val(msg);
             });
         }
 
@@ -83,7 +89,7 @@
                 let code = data.code,
                     error = data.error||'',
                     msg = `code:${code} \n${error}`
-                $("#sendadmin").attr("placeholder", msg);
+                $("#sendadmin").val(msg);
             });
         }
 
@@ -100,7 +106,7 @@
                 let code = data.code,
                     error = data.error||'',
                     msg = `code:${code} \n${error}`
-                $("#senduser").attr("placeholder", msg);
+                $("#senduser").val(msg);
             });
         }
 
@@ -115,7 +121,7 @@
                     error = data.error||'',
                     tokens = data.token/100000||'0',
                     msg = `Баланс:${tokens} EVC \ncode:${code} \n${error}`
-                $("#tokenbalance").attr("placeholder", msg);
+                $("#tokenbalance").val(msg);
             });
         }
 
@@ -132,6 +138,16 @@
                 $("#getWallet").val(msg);
             });
         }
-        
+
+        function getGasPrice(){
+            $.get("/price")
+            .done(function (data) {
+                let gwei = data.gwei,
+                    eth = data.eth,
+                    usd = data.usd,
+                    msg = `gwei:${gwei} \neth:${eth} \nusd:${usd}`;
+                $("#gasprice").val(msg)
+            });
+        }  
     </script>
 {% endblock %}

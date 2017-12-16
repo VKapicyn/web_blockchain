@@ -1,5 +1,6 @@
 const config = require('../../config'),
     options = require('../../options.json'),
+    _request = require('request-promise'),
 
     Web3 = require('web3'),
     web3 = new Web3(new Web3.providers.HttpProvider(options.provider)),
@@ -69,3 +70,18 @@ exports.sendEth = async (addressTo, gasPrice) => {
 
     return tx;
 }
+
+exports.usdPrice = async () => {
+    let url = 'https://api.etherscan.io/api?module=stats&action=ethprice&apikey=YourApiKeyToken',
+        data;
+
+    let response = await _request({
+        url: url,
+        json: true
+    });
+        
+    data = JSON.parse(JSON.stringify(response['result']));
+
+    let res = data.ethusd;
+    return res;
+} 

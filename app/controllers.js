@@ -147,11 +147,14 @@ exports.getUserToken = async (req, res) => {
 exports.getGasInfo = async (req, res) => {
     //запрос цены gasprice, и умножение на газ при транзакции
     let price = await eth.getGasPrice();
+        
+    let _eth = (Number(options.gas)+21000)*price/1000000000000000000,
+        usd = await eth.usdPrice()*_eth;
 
     res.json({
-        gwei: gwei, 
-        eth: eth, 
-        usd: usd,
+        gwei: price/1000000000, 
+        eth: _eth, 
+        usd: usd
     });
 }
 

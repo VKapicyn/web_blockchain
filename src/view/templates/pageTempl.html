@@ -24,7 +24,7 @@
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse1" data-target="#bs-navbar" aria-expanded="false">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -34,14 +34,9 @@
         </div>
 
         <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="nav navbar-nav">
-                <li><a href="/search/guides">С кем пойдем?</a></li>
-                <li><a href="/search/places">Куда пойдем?</a></li>   
-                <li><a href="/FAQ">Задать вопрос</a></li>
-            </ul>
-
             <ul class="nav navbar-nav navbar-right">
                 {% block rightNav %}
+                <li><a href="/admin/logout">Выйти из админки</a></li>
                 {% endblock %}
             </ul>
         </div>

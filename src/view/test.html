@@ -10,7 +10,7 @@
 
 {% block content %}
 <div class="container">
-    Что бы отправить запрос к API необходим ключ: <input type="text" placeholder="Ключ доступа"><br>
+    Что бы отправить запрос к API необходим ключ: <input id="pass" type="text" placeholder="Ключ доступа"><br>
 
     <h2>Создать кошелек для пользователя</h2>
     <input id="c_userId" type="text" placeholder="User ID">
@@ -64,10 +64,10 @@
 {% block commonJS %}
 <script src="/js/jquery-2.2.3.min.js"></script>
     <script>
-        
         function createUser(){
             let params = {
-                userId: $("#c_userId").val()
+                userId: $("#c_userId").val(),
+                passPhrase: $("#pass").val()
             }
             $.post( "/create/user", params)
             .done(function (data) {
@@ -82,7 +82,8 @@
             $("#sendadmin").attr("placeholder", "Ожидание ответа от сервера...");
             let params = {
                 userId: $("#a_userId").val(),
-                tokens: $("#a_tokens").val()
+                tokens: $("#a_tokens").val(),
+                passPhrase: $("#pass").val()
             }
             $.post( "/send/admin", params)
             .done(function (data) {
@@ -98,7 +99,8 @@
             let params = {
                 idFrom: $("#u_idFrom").val(),
                 idTo: $("#u_idTo").val(),
-                tokens: $("#u_tokens").val()
+                tokens: $("#u_tokens").val(),
+                passPhrase: $("#pass").val()
             }
             params.tokens = Number(params.tokens)*100000;
             $.post( "/send/user", params)
@@ -128,13 +130,15 @@
         function getWallet(){
             $("#getWallet").attr("placeholder", "Ожидание ответа от сервера...");
             let params = {
-                id: $("#w_id").val(),
+                id: $("#w_id").val()
             }
-            $.get( "/wallet/" + params.id)
+
+            $.get( "/wallet/" + params.id + '/' + $("#pass").val())
             .done(function (data) {
                 let code = data.code,
-                    wallet = data.wallet,
-                    msg = `Адрес:${wallet.address} PrivateKey:${wallet.privateKey} \ncode:${code}`
+                    wallet = data.wallet||'',
+                    error = data.error||'',
+                    msg = `Адрес:${wallet.address} PrivateKey:${wallet.privateKey} \ncode:${code} \n${error}`
                 $("#getWallet").val(msg);
             });
         }

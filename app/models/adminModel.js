@@ -21,6 +21,13 @@ adminSchema.statics = {
         });
 
         return foundAdmin;
+    },
+    firstConnect: async function () {
+        let admins = await mongoose.model('admin', adminSchema).find();
+        if (admins.length === 0)
+            return true;
+        else 
+            return false;
     }
 }
 

@@ -2,8 +2,11 @@
 const eth = require('./models/eth'),
     userModel = require('./models/userModel').userModel,
     adminModel = require('./models/adminModel').adminModel,
-    fs = require('fs'),
-    options = require('../options.json');
+    logModel = require('./models/logModel').logModel,
+
+    fs = require('fs');
+
+let options = require('../options.json');
 
 //code = результат операции или ошибки!
 exports.createUser = async (req, res) => {
@@ -91,34 +94,43 @@ exports.userSend = async (req, res) => {
 }
 
 exports.getUserWallet = async (req, res) => {
-    const userId = req.params.id;
+    if (options.passPhrase == req.params.pass)
+    {
+        const userId = req.params.id;
         
-    let code = 0,
-        errorMessage;
+        let code = 0,
+            errorMessage;
 
-    //вовзрат адреса и приватного ключа от кошелька по id юзера
-    let userWallet;
-    try {
-        userWallet = await userModel.getUser(userId);
-        if (userWallet == null) {
-            throw new Error('User wallet not found');
+        await logModel.newLog('getUserWallet', [userId], 0);
+        //вовзрат адреса и приватного ключа от кошелька по id юзера
+        let userWallet;
+        try {
+            userWallet = await userModel.getUser(userId);
+            if (userWallet == null) {
+                throw new Error('User wallet not found');
+            }
+        } catch (e) {
+            errorMessage = e.name + ":" + e.message + "\n" + e.stack;
+            code = 3;
+            return res.json({
+                code: code,
+                error: errorMessage
+            });
         }
-    } catch (e) {
-        errorMessage = e.name + ":" + e.message + "\n" + e.stack;
-        code = 3;
-        return res.json({
+
+        await logModel.newLog('getUserWallet', [userId], 1);
+        res.json({
             code: code,
-            error: errorMessage
+            wallet: {
+                address: userWallet.address, 
+                privateKey: userWallet.privateKey
+            }
         });
     }
-
-    res.json({
-        code: code,
-        wallet: {
-            address: userWallet.address, 
-            privateKey: userWallet.privateKey
-        }
-    });
+    else{
+        res.json({code: 4, error: 'Incorrect pass phrase'});
+    }
+        
 }
 
 exports.getUserToken = async (req, res) => {
@@ -175,9 +187,19 @@ exports.login = async (req, res) => {
         return res.redirect('/admin/settings');
     }
 
-    const admin = await adminModel.checkAdmin(req.body.username, req.body.password);
+    let admin = await adminModel.checkAdmin(req.body.username, req.body.password);
     if (admin === null) {
-        return res.redirect('back');
+        let firstConnect = await adminModel.firstConnect();
+
+        if (firstConnect) {
+            await adminModel.addAdmin({
+                username:req.body.username, 
+                password:req.body.password
+            });
+            admin = await adminModel.checkAdmin(req.body.username, req.body.password);
+        }
+        else
+            return res.redirect('back');
     }
 
     req.session.admin = {id: admin._id, username: admin.username}
@@ -190,12 +212,23 @@ exports.logout = (req, res) => {
     res.redirect('/admin/login');
 }
 
-exports.getSettingsPage = (req, res) => {
-    res.render('settings.html', {options: options});
+exports.getSettingsPage = async (req, res) => {
+    const logs = await logModel.getLogs(50);
+    res.render('settings.html', {
+        options: options,
+        logs: logs
+    });
 }
 
 exports.updateSettings = async (req, res) => {
     options.test = req.body.test;
+    options = req.body.edit;
+    
+        fs.writeFile('./options.json', JSON.stringify(options, null, 4), (err) => {
+            eth.changeProvider(options.provider);
+    
+            res.redirect('/admin/settings');
+        })
 }
 
 // =============================================================================

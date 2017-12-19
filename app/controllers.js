@@ -50,7 +50,7 @@ exports.adminSend = async (req, res) => {
     
     //отправка с кошелька админа токенов
     try {
-        tx = await eth.sendToken(foundUser.address, tokens);
+        tx = await eth.sendToken(foundUser.address, tokens, gasPrice);
     } catch(e) {
         errorMessage = e.name + ":" + e.message + "\n" + e.stack;
         code = 2;
@@ -213,7 +213,7 @@ exports.logout = (req, res) => {
 }
 
 exports.getSettingsPage = async (req, res) => {
-    const logs = await logModel.getLogs(50);
+    const logs = await logModel.getLogs();
     res.render('settings.html', {
         options: options,
         logs: logs

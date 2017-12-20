@@ -10,6 +10,7 @@ router.post('/send/user', middleware.isPassPhrase, controllers.userSend);
 router.get('/wallet/:id/:pass', controllers.getUserWallet);
 router.get('/token/:id', controllers.getUserToken);
 router.get('/price', controllers.getGasInfo);
+router.get('/sync', controllers.sync);
 
 router.get('/test', controllers.testPage);
 

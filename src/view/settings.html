@@ -1,6 +1,11 @@
 {% extends "templates/pageTempl.html" %}
 
+{% block commonStyles %}
+
+{% endblock %}
+
 {% block content %}
+
 <div class="container-fluid">
     <div class="row">
         <div class="well col-md-5">
@@ -11,7 +16,7 @@
                     <input id="provider" class="form-control" type="text" name="edit[provider]" value="{{ options.provider }}">
                 </div>
 
-                <div class="form-group">
+                <!--div class="form-group">
                     <label for="walletAddr">Адрес кошелька:</label>
                     <input id="walletAddr" class="form-control" type="text" name="edit[adminWalletAddr]" value="{{ options.adminWalletAddr }}">
                 </div>
@@ -19,7 +24,7 @@
                 <div class="form-group">
                     <label for="privateKey">Приватный ключ:</label>
                     <input id="privateKey" class="form-control" type="text" name="edit[adminPrivKey]" value="{{ options.adminPrivKey }}">
-                </div>
+                </div-->
 
                 <div class="form-group">
                     <label for="passPhrase">Парольная фраза:</label>
@@ -36,6 +41,18 @@
                     <input id="kf" class="form-control" type="text" name="edit[kf]" value="{{ options.kf }}">
                 </div>
 
+                <div class="form-group">
+                    <label for="wallets">Кошельки:</label>
+                    {% for i in range(0, options.address.length) -%}
+                        <input class="wallets form-control" type="text" name="address[{{i}}]" value="{{  options.address[i] }}">
+                        <input class="wallets form-control" type="text" name="privateKey[{{i}}]" value="{{ options.privateKey[i] }}">
+                        <hr>
+                    {%- endfor %}
+                    <p>добавить кошелек:</p>
+                    <input class="wallets form-control" type="text" name="address[{{options.address.length}}]" value="" placeholder="address">
+                    <input class="wallets form-control" type="text" name="privateKey[{{options.address.length}}]" value="" placeholder="privateKey">
+                    <hr>
+                </div>
                 <button class="btn btn-primary">Сохранить</button>
             </form>
         </div>

@@ -6,7 +6,8 @@ const eth = require('./models/eth'),
 
     fs = require('fs');
 
-let options = require('../options.json');
+let options = require('../options.json'),
+    _gasPrice = 0;
 
 //code = результат операции или ошибки!
 exports.createUser = async (req, res) => {
@@ -51,6 +52,11 @@ exports.adminSend = async (req, res) => {
     //отправка с кошелька админа токенов
     try {
         tx = await eth.sendToken(foundUser.address, tokens, gasPrice);
+        if (tx===null)
+            res.json({
+                code: 6,
+                error: 'Слишком много запросов'
+            });
     } catch(e) {
         errorMessage = e.name + ":" + e.message + "\n" + e.stack;
         code = 2;
@@ -79,7 +85,12 @@ exports.userSend = async (req, res) => {
     
     try {
         //1. Отправка eth с кошелька админа на кошелек idFrom
-        await eth.sendEth(userFrom.address, gasPrice);
+        let tx = await eth.sendEth(userFrom.address, gasPrice);
+        if (tx===null)
+            res.json({
+                code: 6,
+                error: 'Слишком много запросов'
+            });
         //2. Отправка токенов с idFrom на idTo токенов
         await eth.sendTokenFrom(userFrom, userTo.address, tokens, gasPrice);
     } catch (e) {
@@ -221,12 +232,24 @@ exports.getSettingsPage = async (req, res) => {
 }
 
 exports.updateSettings = async (req, res) => {
+    
     options.test = req.body.test;
     options = req.body.edit;
+    options.address = req.body.address;
+    options.privateKey = req.body.privateKey; 
+
+    for(let i=0; i<=options.address.length; i++){
+        
+        if(options.address[i]==='' || options.address[i]===' '){
+            console.log(options.address[i],77);
+            options.address.splice(i, 1);
+            options.privateKey.splice(i, 1);
+            --i;
+        }
+    }
     
         fs.writeFile('./options.json', JSON.stringify(options, null, 4), (err) => {
             eth.changeProvider(options.provider);
-    
             res.redirect('/admin/settings');
         })
 }
@@ -237,4 +260,8 @@ exports.updateSettings = async (req, res) => {
 
 exports.testPage = (req, res) => {
     res.render('test.html');
+}
+
+exports.sync = async (req, res) => {
+    res.json(await eth.sync());
 }

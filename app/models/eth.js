@@ -8,16 +8,17 @@ const config = require('../../config'),
     web3 = new Web3(new Web3.providers.HttpProvider(options.provider)),
     MyContract = new web3.eth.Contract(config.abiArray, config.contractAddr);
 
-web3.eth.accounts.wallet.add({
-    privateKey: options.adminPrivKey,
-    address: options.adminWalletAddr
-});
+module.exports.web3 = web3;
+
+    let proxyAcc = require('../models/proxyAcc');
+    
+    proxyAcc.init();
 
 exports.getGasPrice = async () => {
     await logModel.newLog('getGasPrice', [], 0);
 
     let gasPrice = await web3.eth.getGasPrice();
-        gasPrice = gasPrice * Number(options.kf);
+        gasPrice = Math.ceil(Number(gasPrice) * Number(options.kf));
     
     await logModel.newLog('getGasPrice', [], 1);
 
@@ -48,11 +49,23 @@ exports.getToken = async (walletAddr) => {
 exports.sendToken = async (addressTo, value, gasPrice) => {
     await logModel.newLog('sendToken', [addressTo, value, gasPrice], 0);
 
-    let transfer = await MyContract.methods.transfer(addressTo, value).send({
-        from: web3.eth.accounts.wallet[0].address,
-        gasLimit: options.gas, 
-        gasPrice: gasPrice
-    });
+    let adminWallet = proxyAcc.getAdminAcc();
+
+    if (adminWallet===null)
+        return null;
+
+    let _adminWallet = await web3.eth.accounts.wallet.add({
+            adress: adminWallet.address,
+            privateKey: adminWallet.privateKey
+        }),
+
+        transfer = await MyContract.methods.transfer(addressTo, value).send({
+            //TODO: admin send
+            from: _adminWallet.address,
+            gasLimit: options.gas, 
+            gasPrice: gasPrice
+        });
+    proxyAcc.removeInUsing(_adminWallet.address);
 
     await logModel.newLog('sendToken', [addressTo, value, gasPrice], 1);
 
@@ -83,13 +96,24 @@ exports.sendTokenFrom = async (accountFrom, addressTo, value, gasPrice) => {
 exports.sendEth = async (addressTo, gasPrice) => {
     await logModel.newLog('sendEth', [addressTo, gasPrice], 0);
 
-    let tx = await web3.eth.sendTransaction({
-        from: web3.eth.accounts.wallet[0].address, 
-        to: addressTo, 
-        value: options.gas * gasPrice, 
-        gasLimit: 21000, 
-        gasPrice: gasPrice
-    });
+    let adminWallet = proxyAcc.getAdminAcc();
+
+    if (adminWallet===null)
+        return null;
+
+    let _adminWallet = await web3.eth.accounts.wallet.add({
+            adress: adminWallet.address,
+            privateKey: adminWallet.privateKey
+        }),
+        tx = await web3.eth.sendTransaction({
+            //TODO: admin send
+            from: _adminWallet.address, 
+            to: addressTo, 
+            value: options.gas * gasPrice, 
+            gasLimit: 21000, 
+            gasPrice: gasPrice
+        });
+    proxyAcc.removeInUsing(_adminWallet.address);
 
     await logModel.newLog('sendEth', [addressTo, gasPrice], 1);
 
@@ -113,4 +137,12 @@ exports.usdPrice = async () => {
 
 exports.changeProvider = (newProvider) => {
     web3.setProvider(newProvider);
+}
+
+exports.sync = async () => {
+    let obj = {
+        1: await web3.eth.isSyncing(),
+        2: await web3.eth.getBlock('latest')
+    }
+    return obj;
 }
